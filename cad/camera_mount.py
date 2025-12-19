@@ -27,7 +27,7 @@ class CameraMountParams:
     """Parameters for stereo camera mount with microphones"""
 
     # Stereo baseline (distance between camera centers)
-    stereo_baseline: float = 70.0  # mm (6-8cm typical)
+    stereo_baseline: float = 120.0  # mm (12cm for better depth at 2-10m)
 
     # Pi Camera v3 dimensions
     camera_pcb_width: float = 25.0   # mm
@@ -53,8 +53,8 @@ class CameraMountParams:
     mic_mount_hole: float = 1.8    # mm for M1.6 or friction fit
 
     # Microphone array spacing (for TDOA localization)
-    mic_front_spacing: float = 80.0   # mm between front L/R mics
-    mic_side_offset: float = 50.0     # mm from center to side mics
+    mic_front_spacing: float = 140.0  # mm between front L/R mics (wider than cameras)
+    mic_side_offset: float = 70.0     # mm from center to side mics
 
     # Mount body
     mount_thickness: float = 4.0      # mm
@@ -69,9 +69,9 @@ class CameraMountParams:
     pi_hole_diameter: float = 2.7    # mm for M2.5
     pi_standoff_height: float = 8.0  # mm
 
-    # Base plate (increased for mics)
-    base_width: float = 130.0   # mm
-    base_depth: float = 80.0    # mm
+    # Base plate (sized for 120mm baseline + mics)
+    base_width: float = 160.0   # mm (120mm baseline + camera holders)
+    base_depth: float = 85.0    # mm
     base_thickness: float = 4.0 # mm
 
     # Tilt adjustment
