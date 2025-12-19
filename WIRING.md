@@ -638,7 +638,88 @@ dtoverlay=hifiberry-dac
 
 ---
 
-## 7. FOOT CONTACT SWITCHES
+## 7. STATUS LED RING (WS2812B)
+
+```
+    WS2812B NeoPixel Ring Wiring
+    ============================
+
+    Using 16-LED ring for status indication.
+
+         Pi 5                      WS2812B Ring
+         ====                      ============
+
+         GPIO18 (Pin 12) ────────── DIN (Data In)
+         GND     (Pin 6) ─────┬──── GND
+                              │
+         5V      (Pin 4) ─────┼──── 5V (VCC)
+                              │
+         (optional 1000µF) ───┴──── Between 5V and GND
+
+
+    Level Shifter (Recommended):
+    ============================
+
+    Pi 5 GPIO is 3.3V, WS2812B needs 5V signal.
+    Often works without, but for reliability:
+
+         GPIO18 ──── 74AHCT125 ──── DIN
+                     (or similar)
+
+
+    LED Pinout:
+    ===========
+
+         LED Ring
+         ┌──────────────────┐
+         │   DIN   5V  GND  │
+         │    ▲    ▲    ▲   │
+         │    │    │    │   │
+         │   ┌┴────┴────┴┐  │
+         │   │    [0]    │  │
+         │   │  [15] [1] │  │
+         │   │  ...   ...│  │
+         │   │  [12] [4] │  │
+         │   │    [8]    │  │
+         │   └───────────┘  │
+         │  DOUT (to next)  │
+         └──────────────────┘
+
+
+    Status Colors:
+    ==============
+
+    OFF          = (0,0,0)       - System idle
+    CONNECTING   = (255,165,0)  - Orange pulse
+    CONNECTED    = (0,100,255)  - Blue solid
+    STREAMING    = (0,255,0)    - Green with pulse
+    ERROR        = (255,0,0)    - Red blink
+    AUDIO_ACTIVE = Blue overlay - Sound direction indicator
+
+
+    Environment Variables:
+    ======================
+
+    LED_ENABLED=true      # Enable/disable
+    LED_PIN=18            # GPIO pin (must be PWM capable)
+    LED_NUM=16            # Number of LEDs
+    LED_BRIGHTNESS=0.3    # 0.0 - 1.0
+
+
+    Power Calculation:
+    ==================
+
+    Each LED: max 60mA (full white)
+    16 LEDs × 60mA = 960mA max
+
+    At 30% brightness: ~300mA
+    Can power from Pi 5V rail for small rings.
+    For longer strips, use external 5V supply.
+```
+
+---
+
+## 8. FOOT CONTACT SWITCHES
 
 ```
     Micro Switch Wiring
@@ -672,7 +753,7 @@ dtoverlay=hifiberry-dac
 
 ---
 
-## 8. POWER DISTRIBUTION
+## 9. POWER DISTRIBUTION
 
 ### Power System Overview
 
@@ -763,7 +844,7 @@ dtoverlay=hifiberry-dac
 
 ---
 
-## 9. COMPLETE WIRING CHECKLIST
+## 10. COMPLETE WIRING CHECKLIST
 
 ```
     PRE-POWER CHECKLIST
@@ -796,7 +877,7 @@ dtoverlay=hifiberry-dac
 
 ---
 
-## 10. TROUBLESHOOTING
+## 11. TROUBLESHOOTING
 
 ### Common Issues
 
@@ -839,7 +920,7 @@ dtoverlay=hifiberry-dac
 
 ---
 
-## 11. TEST COMMANDS
+## 12. TEST COMMANDS
 
 ```bash
 # I2C scan

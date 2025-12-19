@@ -15,3 +15,8 @@ python-socketio[asyncio]>=5.10.0  # For NestJS server compatibility
 
 # Utils
 python-dotenv>=1.0.0
+
+# LED Control (WS2812B / NeoPixel)
+rpi_ws281x>=5.0.0
+adafruit-circuitpython-neopixel>=6.3.0
+adafruit-blinka>=8.20.0  # Provides 'board' module

@@ -31,6 +31,7 @@ except ImportError:
 from config import StreamingConfig
 from audio_streamer import AudioStreamer, AudioFrame
 from video_streamer import StereoVideoStreamer, VideoFrame
+from led_controller import LedController, LedConfig, LedStatus, set_controller
 
 # Configure logging
 logging.basicConfig(
@@ -71,6 +72,10 @@ class StreamingService:
         self.audio = AudioStreamer(config.audio) if config.audio.enabled else None
         self.video = StereoVideoStreamer(config.video) if config.video.enabled else None
 
+        # LED controller
+        self.led = LedController(LedConfig.from_env())
+        set_controller(self.led)
+
         # Connection
         self.websocket = None
         self.http_session = None
@@ -105,15 +110,23 @@ class StreamingService:
     async def connect(self) -> bool:
         """Connect to streaming server"""
 
+        self.led.set_status(LedStatus.CONNECTING)
         protocol = self.config.server.protocol
 
         if protocol == "websocket":
-            return await self._connect_websocket()
+            success = await self._connect_websocket()
         elif protocol == "http":
-            return await self._connect_http()
+            success = await self._connect_http()
         else:
             logger.error(f"Unknown protocol: {protocol}")
+            self.led.set_status(LedStatus.ERROR)
             return False
+
+        if success:
+            self.led.set_status(LedStatus.CONNECTED)
+        else:
+            self.led.set_status(LedStatus.ERROR)
+        return success
 
     async def _connect_websocket(self) -> bool:
         """Connect via WebSocket"""
@@ -311,6 +324,9 @@ class StreamingService:
         self.running = True
         self.stats["start_time"] = time.time()
 
+        # Start LED controller
+        await self.led.start()
+
         # Connect to server
         if not await self.connect():
             logger.error("Failed to connect to server")
@@ -321,6 +337,9 @@ class StreamingService:
             await self.audio.start()
         if self.video:
             await self.video.start()
+
+        # Set streaming status
+        self.led.set_status(LedStatus.STREAMING)
 
         # Create streaming tasks
         tasks = [
@@ -346,6 +365,10 @@ class StreamingService:
 
         logger.info("Stopping streaming service...")
         self.running = False
+
+        # LED off
+        self.led.set_status(LedStatus.OFF)
+        await self.led.stop()
 
         if self.audio:
             await self.audio.stop()

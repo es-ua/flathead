@@ -25,14 +25,22 @@ services:
       - VIDEO_HEIGHT=${VIDEO_HEIGHT:-480}
       - VIDEO_FPS=${VIDEO_FPS:-30}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      # LED settings
+      - LED_ENABLED=${LED_ENABLED:-true}
+      - LED_PIN=${LED_PIN:-18}
+      - LED_NUM=${LED_NUM:-16}
+      - LED_BRIGHTNESS=${LED_BRIGHTNESS:-0.3}
 
-    # Device access for cameras and audio
+    # Device access for cameras, audio, and GPIO
     devices:
       # Cameras
       - /dev/video0:/dev/video0
       - /dev/video1:/dev/video1
       # I2S audio (may vary)
       - /dev/snd:/dev/snd
+      # GPIO for WS2812B LEDs
+      - /dev/gpiomem:/dev/gpiomem
+      - /dev/mem:/dev/mem
 
     # Required for camera access
     privileged: true
@@ -41,6 +49,7 @@ services:
     group_add:
       - audio
       - video
+      - gpio
 
     # Volume for config/logs
     volumes:
