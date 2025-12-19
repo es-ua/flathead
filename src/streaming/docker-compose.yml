@@ -1,0 +1,82 @@
+# FLATHEAD Streaming Service - Docker Compose
+# Run on Raspberry Pi 5
+
+version: '3.8'
+
+services:
+  streaming:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flathead-streaming
+    restart: unless-stopped
+
+    # Environment configuration
+    environment:
+      - STREAM_WS_URL=${STREAM_WS_URL:-ws://192.168.1.100:8765}
+      - STREAM_HTTP_URL=${STREAM_HTTP_URL:-http://192.168.1.100:5000}
+      - STREAM_PROTOCOL=${STREAM_PROTOCOL:-websocket}
+      - STREAM_API_KEY=${STREAM_API_KEY:-}
+      - ROBOT_ID=${ROBOT_ID:-flathead-01}
+      - AUDIO_ENABLED=${AUDIO_ENABLED:-true}
+      - VIDEO_ENABLED=${VIDEO_ENABLED:-true}
+      - AUDIO_SAMPLE_RATE=${AUDIO_SAMPLE_RATE:-48000}
+      - VIDEO_WIDTH=${VIDEO_WIDTH:-640}
+      - VIDEO_HEIGHT=${VIDEO_HEIGHT:-480}
+      - VIDEO_FPS=${VIDEO_FPS:-30}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+
+    # Device access for cameras and audio
+    devices:
+      # Cameras
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+      # I2S audio (may vary)
+      - /dev/snd:/dev/snd
+
+    # Required for camera access
+    privileged: true
+
+    # Group access
+    group_add:
+      - audio
+      - video
+
+    # Volume for config/logs
+    volumes:
+      - ./config:/app/config:ro
+      - ./logs:/app/logs
+
+    # Network
+    network_mode: host
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+
+# Optional: Local test server
+  test-server:
+    image: python:3.11-slim
+    container_name: flathead-test-server
+    profiles:
+      - test
+    ports:
+      - "8765:8765"
+    volumes:
+      - ./server:/app
+    working_dir: /app
+    command: python server.py
+    environment:
+      - PYTHONUNBUFFERED=1
