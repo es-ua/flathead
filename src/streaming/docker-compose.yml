@@ -13,8 +13,8 @@ services:
 
     # Environment configuration
     environment:
-      - STREAM_WS_URL=${STREAM_WS_URL:-ws://192.168.1.100:8765}
-      - STREAM_HTTP_URL=${STREAM_HTTP_URL:-http://192.168.1.100:5000}
+      - STREAM_WS_URL=${STREAM_WS_URL:-ws://192.168.1.100:3000}
+      - STREAM_HTTP_URL=${STREAM_HTTP_URL:-http://192.168.1.100:3000}
       - STREAM_PROTOCOL=${STREAM_PROTOCOL:-websocket}
       - STREAM_API_KEY=${STREAM_API_KEY:-}
       - ROBOT_ID=${ROBOT_ID:-flathead-01}
