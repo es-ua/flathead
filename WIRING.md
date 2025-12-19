@@ -638,72 +638,97 @@ dtoverlay=hifiberry-dac
 
 ---
 
-## 7. STATUS LED RING (WS2812B)
+## 7. STATUS LED RINGS (2× WS2812B 8-LED)
 
 ```
-    WS2812B NeoPixel Ring Wiring
-    ============================
+    Dual WS2812B 8-LED Rings (one per camera)
+    =========================================
 
-    Using 16-LED ring for status indication.
-
-         Pi 5                      WS2812B Ring
-         ====                      ============
-
-         GPIO18 (Pin 12) ────────── DIN (Data In)
-         GND     (Pin 6) ─────┬──── GND
-                              │
-         5V      (Pin 4) ─────┼──── 5V (VCC)
-                              │
-         (optional 1000µF) ───┴──── Between 5V and GND
+    Left camera ring:  8 LEDs
+    Right camera ring: 8 LEDs
+    Total: 16 LEDs
 
 
-    Level Shifter (Recommended):
-    ============================
+    OPTION 1: Daisy-Chain (Recommended)
+    ===================================
 
-    Pi 5 GPIO is 3.3V, WS2812B needs 5V signal.
-    Often works without, but for reliability:
+    Both rings connected in series on one GPIO pin:
 
-         GPIO18 ──── 74AHCT125 ──── DIN
-                     (or similar)
+         Pi 5                Ring 1 (Left)      Ring 2 (Right)
+         ====                =============      ==============
+
+         GPIO18 (Pin 12) ──── DIN
+                              DOUT ──────────── DIN
+                                                DOUT (unused)
+
+         5V     (Pin 4)  ──── VCC ─────────── VCC
+         GND    (Pin 6)  ──── GND ─────────── GND
 
 
-    LED Pinout:
-    ===========
+    Wiring Diagram:
+    ===============
 
-         LED Ring
-         ┌──────────────────┐
-         │   DIN   5V  GND  │
-         │    ▲    ▲    ▲   │
-         │    │    │    │   │
-         │   ┌┴────┴────┴┐  │
-         │   │    [0]    │  │
-         │   │  [15] [1] │  │
-         │   │  ...   ...│  │
-         │   │  [12] [4] │  │
-         │   │    [8]    │  │
-         │   └───────────┘  │
-         │  DOUT (to next)  │
-         └──────────────────┘
+                    ┌─────────────┐     ┌─────────────┐
+         GPIO18 ────┤ DIN    DOUT ├─────┤ DIN    DOUT ├──(nc)
+                    │             │     │             │
+           5V   ────┤ VCC         │     │ VCC         │
+                    │   [LEFT]    │     │   [RIGHT]   │
+          GND   ────┤ GND         │     │ GND         │
+                    │  CAMERA     │     │  CAMERA     │
+                    └─────────────┘     └─────────────┘
+                      LEDs 0-7           LEDs 8-15
+
+
+    OPTION 2: Separate Pins
+    =======================
+
+    Each ring on its own GPIO (independent control):
+
+         GPIO18 (Pin 12) ──── DIN (Left ring)
+         GPIO12 (Pin 32) ──── DIN (Right ring)
+         5V     (Pin 4)  ──── VCC (both)
+         GND    (Pin 6)  ──── GND (both)
+
+
+    Physical Mounting:
+    ==================
+
+         ┌─────────────────────────────────────┐
+         │           ROBOT HEAD                │
+         │                                     │
+         │   ┌───────┐           ┌───────┐    │
+         │   │○○○○○○○│           │○○○○○○○│    │
+         │   │○┌───┐○│           │○┌───┐○│    │
+         │   │○│CAM│○│           │○│CAM│○│    │
+         │   │○│ L │○│           │○│ R │○│    │
+         │   │○└───┘○│           │○└───┘○│    │
+         │   │○○○○○○○│           │○○○○○○○│    │
+         │   └───────┘           └───────┘    │
+         │     LEFT               RIGHT       │
+         └─────────────────────────────────────┘
 
 
     Status Colors:
     ==============
 
     OFF          = (0,0,0)       - System idle
-    CONNECTING   = (255,165,0)  - Orange pulse
-    CONNECTED    = (0,100,255)  - Blue solid
-    STREAMING    = (0,255,0)    - Green with pulse
-    ERROR        = (255,0,0)    - Red blink
-    AUDIO_ACTIVE = Blue overlay - Sound direction indicator
+    CONNECTING   = (255,165,0)   - Orange pulse (both rings)
+    CONNECTED    = (0,100,255)   - Blue solid (both rings)
+    STREAMING    = (0,255,0)     - Green + white rotating dot
+    ERROR        = (255,0,0)     - Red blink
+    AUDIO_LEFT   = Blue glow on left ring  (sound from left)
+    AUDIO_RIGHT  = Blue glow on right ring (sound from right)
 
 
     Environment Variables:
     ======================
 
-    LED_ENABLED=true      # Enable/disable
-    LED_PIN=18            # GPIO pin (must be PWM capable)
-    LED_NUM=16            # Number of LEDs
-    LED_BRIGHTNESS=0.3    # 0.0 - 1.0
+    LED_ENABLED=true          # Enable/disable
+    LED_DAISY_CHAIN=true      # true=one pin, false=two pins
+    LED_PIN_LEFT=18           # GPIO for left (or both if daisy)
+    LED_PIN_RIGHT=12          # GPIO for right (if separate)
+    LED_PER_RING=8            # LEDs per ring
+    LED_BRIGHTNESS=0.3        # 0.0 - 1.0
 
 
     Power Calculation:
@@ -713,8 +738,7 @@ dtoverlay=hifiberry-dac
     16 LEDs × 60mA = 960mA max
 
     At 30% brightness: ~300mA
-    Can power from Pi 5V rail for small rings.
-    For longer strips, use external 5V supply.
+    Safe to power from Pi 5V rail.
 ```
 
 ---

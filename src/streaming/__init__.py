@@ -13,7 +13,7 @@ Components:
 from .config import StreamingConfig, AudioConfig, VideoConfig, ServerConfig
 from .audio_streamer import AudioStreamer, AudioFrame, SoundLocalizer
 from .video_streamer import StereoVideoStreamer, VideoFrame, DepthEstimator
-from .led_controller import LedController, LedConfig, LedStatus
+from .led_controller import LedController, LedConfig, LedStatus, CameraStatus
 
 __all__ = [
     "StreamingConfig",
@@ -29,6 +29,7 @@ __all__ = [
     "LedController",
     "LedConfig",
     "LedStatus",
+    "CameraStatus",
 ]
 
 __version__ = "1.0.0"

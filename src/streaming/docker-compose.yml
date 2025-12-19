@@ -25,10 +25,12 @@ services:
       - VIDEO_HEIGHT=${VIDEO_HEIGHT:-480}
       - VIDEO_FPS=${VIDEO_FPS:-30}
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
-      # LED settings
+      # LED settings (dual 8-LED rings)
       - LED_ENABLED=${LED_ENABLED:-true}
-      - LED_PIN=${LED_PIN:-18}
-      - LED_NUM=${LED_NUM:-16}
+      - LED_DAISY_CHAIN=${LED_DAISY_CHAIN:-true}
+      - LED_PIN_LEFT=${LED_PIN_LEFT:-18}
+      - LED_PIN_RIGHT=${LED_PIN_RIGHT:-12}
+      - LED_PER_RING=${LED_PER_RING:-8}
       - LED_BRIGHTNESS=${LED_BRIGHTNESS:-0.3}
 
     # Device access for cameras, audio, and GPIO
