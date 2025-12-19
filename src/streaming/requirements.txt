@@ -1,0 +1,22 @@
+# FLATHEAD Streaming Service Dependencies
+
+# Audio
+sounddevice>=0.4.6
+numpy>=1.24.0
+
+# Video
+opencv-python-headless>=4.8.0
+# picamera2 - install via apt on Pi: sudo apt install python3-picamera2
+
+# Networking
+websockets>=12.0
+aiohttp>=3.9.0
+python-socketio[asyncio]>=5.10.0  # For NestJS server compatibility
+
+# Utils
+python-dotenv>=1.0.0
+
+# LED Control (WS2812B / NeoPixel)
+rpi_ws281x>=5.0.0
+adafruit-circuitpython-neopixel>=6.3.0
+adafruit-blinka>=8.20.0  # Provides 'board' module

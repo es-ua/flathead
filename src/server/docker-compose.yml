@@ -1,0 +1,79 @@
+# FLATHEAD Streaming Server - Docker Compose
+# Run on your PC/server to receive streams from robots
+
+version: '3.8'
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flathead-server
+    restart: unless-stopped
+
+    ports:
+      - "${PORT:-3000}:3000"
+
+    environment:
+      - NODE_ENV=${NODE_ENV:-production}
+      - PORT=3000
+      - CORS_ORIGIN=${CORS_ORIGIN:-*}
+
+    volumes:
+      # Recordings persist on host
+      - ./recordings:/app/recordings
+
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    # Resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 256M
+
+  # Development mode with hot reload
+  dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: flathead-server-dev
+    profiles:
+      - dev
+
+    ports:
+      - "3000:3000"
+      - "9229:9229"  # Debug port
+
+    environment:
+      - NODE_ENV=development
+
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - ./recordings:/app/recordings
+
+    command: npm run start:dev
+
+
+  # Web UI for viewing streams (optional)
+  web-ui:
+    image: nginx:alpine
+    container_name: flathead-web-ui
+    profiles:
+      - ui
+
+    ports:
+      - "8080:80"
+
+    volumes:
+      - ./web:/usr/share/nginx/html:ro
+
+    depends_on:
+      - server
