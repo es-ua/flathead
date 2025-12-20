@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  flathead-camera-client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flathead-camera-client
+    restart: unless-stopped
+    privileged: true  # Required for camera access
+
+    environment:
+      - SERVER_URL=${SERVER_URL:-http://192.168.1.100:8080}
+      - LEFT_CAMERA_ID=${LEFT_CAMERA_ID:-0}
+      - RIGHT_CAMERA_ID=${RIGHT_CAMERA_ID:-1}
+      - CONFIG_PATH=/app/config/config.yml
+
+    volumes:
+      # Camera devices
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+      # V4L2 devices for Pi Camera
+      - /dev/vchiq:/dev/vchiq
+      - /dev/vcio:/dev/vcio
+      # Config mount
+      - ./config:/app/config:ro
+
+    devices:
+      - /dev/video0:/dev/video0
+      - /dev/video1:/dev/video1
+
+    # For hardware acceleration
+    group_add:
+      - video
+
+    networks:
+      - flathead-network
+
+networks:
+  flathead-network:
+    driver: bridge

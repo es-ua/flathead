@@ -1,0 +1,19 @@
+# Flathead Camera Streaming Client Configuration
+
+server:
+  url: "http://192.168.1.100:8080"
+  namespace: "/stream"
+
+cameras:
+  left:
+    device_id: 0
+    width: 640
+    height: 480
+    fps: 30
+  right:
+    device_id: 1
+    width: 640
+    height: 480
+    fps: 30
+
+reconnect_delay: 5
