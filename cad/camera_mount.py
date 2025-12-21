@@ -121,7 +121,7 @@ def create_camera_holder(params: CameraMountParams) -> cq.Workplane:
         .faces(">Y")
         .workplane()
         .circle(p.ring_inner_diameter / 2)
-        .cutThrough()
+        .cutThruAll()
     )
 
     # Camera PCB slot (from back)
@@ -348,7 +348,7 @@ def create_led_ring_clip(params: CameraMountParams) -> cq.Workplane:
         .workplane()
         .center(p.ring_outer_diameter / 2, 0)
         .rect(20, 15)
-        .cutThrough()
+        .cutThruAll()
     )
 
     return clip
