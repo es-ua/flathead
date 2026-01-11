@@ -106,8 +106,9 @@ Complete wiring documentation for all components.
       GPIO10 - Pin 19  - BL foot
       GPIO9  - Pin 21  - BR foot
 
-    Audio Amplifier:
-      GPIO26 (PWM) - Pin 37
+    Audio (ESP32 co-processor via I2C):
+      (No dedicated GPIO - uses I2C bus)
+      GPIO26 - Pin 37 - FREE (was PWM audio)
 
     Motor Encoders:
       GPIO7  - Pin 26  - FL encoder A
@@ -211,28 +212,79 @@ dtoverlay=i2s-gpio28-31
 dtoverlay=hifiberry-dac
 ```
 
-### Audio Output - PAM8403 Amplifier
+### Audio Output - ESP32 + MAX98357A (I2S DAC)
 
 ```
-    PAM8403 Amplifier                Raspberry Pi 5
-    =================                ==============
+    ESP32 as Audio Co-Processor
+    ===========================
 
-         VCC ─────────────────────── 5V (Pin 2)
-         GND ─────────────────────── GND (Pin 6)
-         INL ─────────────────────── GPIO26 (Pin 37) via RC filter
-         INR ─────────────────────── GPIO26 (Pin 37) via RC filter
-
-    RC Filter (for PWM to audio):
-         GPIO26 ──┬── 1kΩ ──┬── INL/INR
-                  │         │
-                 10kΩ      10µF
-                  │         │
-                 GND       GND
+    The ESP32 receives text/commands from Pi 5 via I2C,
+    then outputs audio via I2S to MAX98357A DAC.
 
 
-    Speaker Connection:
-         OUT L+ ──────── Speaker + (4Ω 3W)
-         OUT L- ──────── Speaker -
+    Pi 5 (I2C Master)              ESP32-WROOM-32
+    =================              ==============
+
+         GPIO2 (SDA) ──────────────── GPIO21 (SDA)
+         GPIO3 (SCL) ──────────────── GPIO22 (SCL)
+         GND ──────────────────────── GND
+         3.3V ─────────────────────── 3.3V
+
+    ESP32 I2C Address: 0x55
+
+
+    ESP32                          MAX98357A
+    =====                          =========
+
+         GPIO25 (I2S BCLK) ────────── BCLK
+         GPIO26 (I2S LRC)  ────────── LRC
+         GPIO27 (I2S DOUT) ────────── DIN
+         GND ──────────────────────── GND
+         5V (VIN) ─────────────────── VIN
+
+
+    MAX98357A                      Speaker
+    =========                      =======
+
+         OUT+ ─────────────────────── Speaker + (4Ω 3W)
+         OUT- ─────────────────────── Speaker -
+
+
+    Wiring Diagram:
+    ===============
+
+    ┌─────────────┐      I2C       ┌─────────────┐
+    │   Pi 5      │───────────────▶│   ESP32     │
+    │             │  GPIO2/3       │   (0x55)    │
+    │  I2C Master │                │  I2C Slave  │
+    └─────────────┘                └──────┬──────┘
+                                          │ I2S
+                                          ▼
+                                   ┌─────────────┐
+                                   │  MAX98357A  │
+                                   │  I2S DAC    │
+                                   └──────┬──────┘
+                                          │
+                                          ▼
+                                       [🔊]
+                                      Speaker
+
+
+    Communication Protocol:
+    =======================
+
+    Pi 5 sends I2C commands to ESP32:
+      - 0x01 [text...]  : Speak text (TTS)
+      - 0x02 [file_id]  : Play audio file
+      - 0x03 [volume]   : Set volume (0-100)
+      - 0x04            : Stop playback
+      - 0x05            : Get status
+
+    ESP32 firmware handles:
+      - I2C slave communication
+      - Text-to-speech (optional, or receive PCM from Pi)
+      - Audio file playback from SPIFFS
+      - I2S output to MAX98357A
 ```
 
 ---
@@ -250,6 +302,7 @@ dtoverlay=hifiberry-dac
     0x40      PCA9685 #1          Servos 0-15 (Legs FL, FR)
     0x41      PCA9685 #2          Servos 0-15 (Legs BL, BR, Head)
     0x28      BNO055 IMU          9-axis orientation
+    0x55      ESP32 Audio         Audio co-processor (I2S → MAX98357A)
     0x70      TCA9548A #1         Mux for FL leg sensors
     0x71      TCA9548A #2         Mux for FR leg sensors
     0x72      TCA9548A #3         Mux for BL, BR, Head sensors

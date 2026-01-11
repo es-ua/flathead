@@ -66,10 +66,13 @@
 |                                                   |
 |  AUDIO SYSTEM                                     |
 |    4x INMP441 I2S microphone            EUR 20    |
-|    PAM8403 amplifier                    EUR 5     |
+|    ESP32-WROOM-32 (audio co-processor)  EUR 5     |
+|      - I2C slave to Pi 5                          |
+|      - I2S output to DAC                          |
+|    MAX98357A I2S DAC + amplifier        EUR 3     |
 |    Speaker 4 Ohm 3W                     EUR 3     |
 |    -----------------------------------------      |
-|    Subtotal:                            EUR 28    |
+|    Subtotal:                            EUR 31    |
 |                                                   |
 |  5-DOF HYBRID MOTION SYSTEM                       |
 |                                                   |
@@ -159,7 +162,7 @@
 |    Subtotal:                            EUR 14    |
 |                                                   |
 |  ================================================ |
-|  GRAND TOTAL:                           EUR 994   |
+|  GRAND TOTAL:                           EUR 997   |
 |  ================================================ |
 |                                                   |
 |  Evolution from original:                         |
